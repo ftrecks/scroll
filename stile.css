@@ -1,0 +1,15 @@
+html, body, section, div {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.view-section {
+    width: 100%;
+}
+
+.view-div {
+    position: relative;
+    background-color: forestgreen;
+    opacity: 0.3;
+}

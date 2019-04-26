@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="stile.css">
+    <script src="scroll.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let viewHeight = document.documentElement.clientHeight;
+            let sections = document.querySelectorAll('.view-section');
+            let divs = document.querySelectorAll('.view-div');
+            for(let i = 0; i < sections.length; i++) {
+                sections[i].style.height = viewHeight + 'px';
+            }
+            let viewWidth = document.documentElement.clientWidth;
+            let ninetyWidth = Math.ceil(viewWidth * 0.9);
+            let ninetyHeight = Math.ceil(viewHeight * 0.9);
+            let leftSpace = Math.round((viewWidth - ninetyWidth) / 2);
+            let topSpace = Math.round((viewHeight - ninetyHeight) / 2);
+            for(let i = 0; i < divs.length; i++) {
+                divs[i].style.height = ninetyHeight + 'px';
+                divs[i].style.width = ninetyWidth + 'px';
+                divs[i].style.left = leftSpace + 'px';
+                divs[i].style.top = topSpace + 'px';
+            }
+        });
+        scroll();
+    </script>
+</head>
+<body>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+    <section class="view-section">
+        <div class="view-div"></div>
+    </section>
+</body>
+</html>
