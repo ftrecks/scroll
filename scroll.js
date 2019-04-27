@@ -1,8 +1,8 @@
 'use strict';
 
 function scroll(interval, size = 1) {
-    let 
-        allow = true, controlStep = 1, currentPosition = 0, oneFourth = 0, pageHeight = 0, 
+    let
+        allow = true, controlStep = 1, currentPosition = 0, oneFourth = 0, pageHeight = 0,
         pixels = 1, pixelsScrolled = 0, reverse = true, scrollSize = 0, startTime = null,
         step = 0, stepLeap = 1, threeFourth = 0, viewHeight = 0;
 
@@ -50,7 +50,7 @@ function scroll(interval, size = 1) {
         let diffScroll = pixelsScrolled - scrollSize;
         let localStep = 0;
         if(step < 0) {
-            localStep -= step; 
+            localStep -= step;
         } else {
             localStep = step;
         }
@@ -80,7 +80,7 @@ function scroll(interval, size = 1) {
             ((step < 0) && (currentPosition > 0))) {
             return true;
         }
-            
+
         return false;
     }
 
@@ -170,6 +170,6 @@ function scroll(interval, size = 1) {
             document.addEventListener('keydown', startKey);
         }
     }
-    
+
     setTimeout(startScroll, 250);
 }
