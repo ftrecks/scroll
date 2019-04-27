@@ -164,7 +164,7 @@ function scroll(interval, size = 1) {
             viewHeight = document.documentElement.clientHeight;
             scrollSize = Math.round(viewHeight * size);
             oneFourth = Math.round(scrollSize / 4);
-            threeFourth = oneFourth * 3;
+            threeFourth = Math.round(oneFourth * 3);
             pageHeight = document.body.clientHeight;
             document.addEventListener('wheel', startMouse, {passive: false});
             document.addEventListener('keydown', startKey);
