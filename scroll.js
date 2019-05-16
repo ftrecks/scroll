@@ -2,9 +2,10 @@
 
 function scroll(interval, size = 1) {
     let
-        allow = true, controlStep = 1, currentPosition = 0, oneFourth = 0, pageHeight = 0,
-        pixels = 1, pixelsScrolled = 0, reverse = true, scrollSize = 0, startTime = null,
-        step = 0, stepLeap = 1, threeFourth = 0, viewHeight = 0;
+        allow = true, controlStep = 1, allowScroll = '', currentPosition = 0,
+        oneFourth = 0, pageHeight = 0, pixels = 1, pixelsScrolled = 0, reverse = true,
+        scrollSize = 0, startTime = null, step = 0, stepLeap = 1, threeFourth = 0,
+        viewHeight = 0;
 
     function preventScrool(ev) {
         if(ev.preventDefault) {
@@ -17,11 +18,11 @@ function scroll(interval, size = 1) {
         document.documentElement.scrollTop += step;
         if(controlStep === pixels) {
             if(step > 0) {
-                step++;
+                step+= 2;
             } else {
-                step--;
+                step-= 2;
             }
-            stepLeap++;
+            stepLeap+= 2;
             controlStep += (stepLeap * stepLeap);
         }
         pixels += stepLeap;
@@ -36,11 +37,11 @@ function scroll(interval, size = 1) {
         }
         if(controlStep === pixels) {
             if(step > 1) {
-                step--;
+                step-= 2;
             } else if(step < -1) {
-                step++;
+                step+= 2;
             }
-            stepLeap--;
+            stepLeap-= 2;
             controlStep -= stepLeap * stepLeap;
         }
         pixels -= stepLeap;
@@ -125,13 +126,35 @@ function scroll(interval, size = 1) {
             allow = true;
         }
     }
+    
+    function controlSize() {
+        viewHeight = document.documentElement.clientHeight;
+        pageHeight = document.body.clientHeight;
+        scrollSize = Math.round(viewHeight * size);
+        oneFourth = Math.round(scrollSize / 4);
+        threeFourth = Math.round(oneFourth * 3);
+    }
+    
+    function getCurrentElement(ev) {
+        if(!ev) {
+            ev = window.event;
+        }
+        allowScroll = ev.target.dataset.scroll || 'no';
+    }
+    
+    function verifyAllowScroll() {
+        if(allowScroll === 'yes') {
+            return false;
+        }
+        return true;
+    }
 
     function startMouse(ev) {
         if(!ev) {
-            e = window.event;
+            ev = window.event;
         }
-        preventScrool(ev);
-        if(allow) {
+        if(allow && verifyAllowScroll() ) {
+            preventScrool(ev);
             allow = false;
             if(ev.deltaY > 0) {
                 controlScroll(true);
@@ -143,10 +166,10 @@ function scroll(interval, size = 1) {
 
     function startKey(ev) {
         if(!ev) {
-            e = window.event;
+            ev = window.event;
         }
-        preventScrool(ev);
-        if(allow) {
+        if(allow && verifyAllowScroll() ) {
+            preventScrool(ev);
             if((ev.keyCode === 32) || (ev.keyCode === 34) || (ev.keyCode === 40)) {
                 allow = false;
                 controlScroll(true);
@@ -161,13 +184,11 @@ function scroll(interval, size = 1) {
         if(document.readyState === 'loading') {
             setTimeout(startScroll, 250);
         } else {
-            viewHeight = document.documentElement.clientHeight;
-            scrollSize = Math.round(viewHeight * size);
-            oneFourth = Math.round(scrollSize / 4);
-            threeFourth = Math.round(oneFourth * 3);
-            pageHeight = document.body.clientHeight;
+            controlSize();
             document.addEventListener('wheel', startMouse, {passive: false});
             document.addEventListener('keydown', startKey);
+            document.addEventListener('mouseover', getCurrentElement);
+            window.addEventListener('resize', controlSize);
         }
     }
 
