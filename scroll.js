@@ -153,13 +153,15 @@ function scroll(interval, size = 1) {
         if(!ev) {
             ev = window.event;
         }
-        if(allow && verifyAllowScroll() ) {
+        if( verifyAllowScroll() ) {
             preventScrool(ev);
-            allow = false;
-            if(ev.deltaY > 0) {
-                controlScroll(true);
-            } else if(ev.deltaY < 0) {
-                controlScroll(false);
+            if(allow) {
+                allow = false;
+                if(ev.deltaY > 0) {
+                    controlScroll(true);
+                } else if(ev.deltaY < 0) {
+                    controlScroll(false);
+                }
             }
         }
     }
@@ -168,14 +170,16 @@ function scroll(interval, size = 1) {
         if(!ev) {
             ev = window.event;
         }
-        if(allow && verifyAllowScroll() ) {
+        if( verifyAllowScroll() ) {
             preventScrool(ev);
-            if((ev.keyCode === 32) || (ev.keyCode === 34) || (ev.keyCode === 40)) {
-                allow = false;
-                controlScroll(true);
-            } else if((ev.keyCode === 33) || (ev.keyCode === 38)) {
-                allow = false;
-                controlScroll(false);
+            if(allow) {
+                if((ev.keyCode === 32) || (ev.keyCode === 34) || (ev.keyCode === 40)) {
+                    allow = false;
+                    controlScroll(true);
+                } else if((ev.keyCode === 33) || (ev.keyCode === 38)) {
+                    allow = false;
+                    controlScroll(false);
+                }
             }
         }
     }
