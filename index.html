@@ -24,8 +24,21 @@
                 divs[i].style.left = leftSpace + 'px';
                 divs[i].style.top = topSpace + 'px';
             }
+            document.addEventListener('wheel', (ev) => {
+                if(ev.deltaY > 0) {
+                    scroll({direction: 'ahead', interval: 7});
+                } else if(ev.deltaY < 0) {
+                    scroll({direction: 'back', interval: 7});
+                }
+            }, {passive: false});
+            document.addEventListener('keydown', (ev) => {
+                if((ev.keyCode === 32) || (ev.keyCode === 34) || (ev.keyCode === 40)) {
+                    scroll({direction: 'ahead'});
+                } else if((ev.keyCode === 33) || (ev.keyCode === 38)) {
+                    scroll({direction: 'back'});
+                }
+            });
         });
-        scroll();
     </script>
 </head>
 <body>

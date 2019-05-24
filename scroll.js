@@ -1,200 +1,156 @@
 'use strict';
 
-function scroll(interval, size = 1) {
-    let
-        allow = true, controlStep = 1, allowScroll = '', currentPosition = 0,
-        oneFourth = 0, pageHeight = 0, pixels = 1, pixelsScrolled = 0, reverse = true,
-        scrollSize = 0, startTime = null, step = 0, stepLeap = 1, threeFourth = 0,
-        viewHeight = 0;
+const  scroll = (function() {
+    const vars = {
+        allow: true,
+        datasetScroll: false,
+        doc: document.documentElement,
+        interval: 0,
+        firstCompleted: false,
+        midlleMax: 0,
+        pageHeight: 0,
+        pixelScrolled: 0,
+        positionTop: 0,
+        rest: 0,
+        stepMax: {},
+        step: 0,
+        stepLeap: 0,
+        timeStart: null,
+        totalScroll: 0,
+        viewHeight: 0
+    };
 
-    function preventScrool(ev) {
-        if(ev.preventDefault) {
-            ev.preventDefault();
-        }
-        ev.returnValue = false;
-    }
-
-    function smothStart() {
-        document.documentElement.scrollTop += step;
-        if(controlStep === pixels) {
-            if(step > 0) {
-                step+= 2;
+    function defineMaxStep(size) {
+        let 
+            step = 0,
+            pixels = 0;
+        while(true) {
+            if(pixels < size) {
+                step += 2
+                pixels += step;
             } else {
-                step-= 2;
-            }
-            stepLeap+= 2;
-            controlStep += (stepLeap * stepLeap);
-        }
-        pixels += stepLeap;
-    }
-
-    function smothEnd() {
-        document.documentElement.scrollTop += step;
-        if(reverse) {
-            controlStep = controlStep -  (stepLeap * stepLeap);
-            pixels -= stepLeap;
-            reverse = false;
-        }
-        if(controlStep === pixels) {
-            if(step > 1) {
-                step-= 2;
-            } else if(step < -1) {
-                step+= 2;
-            }
-            stepLeap-= 2;
-            controlStep -= stepLeap * stepLeap;
-        }
-        pixels -= stepLeap;
-    }
-
-    function smothStop() {
-        let diffScroll = pixelsScrolled - scrollSize;
-        let localStep = 0;
-        if(step < 0) {
-            localStep -= step;
-        } else {
-            localStep = step;
-        }
-        if((diffScroll > 0) && (diffScroll < localStep)) {
-            if(step > 0) {
-                document.documentElement.scrollTop += (localStep - diffScroll);
-            } else {
-                document.documentElement.scrollTop += (step + diffScroll);
+                break;
             }
         }
-        endStop();
-    }
-
-    function endStop() {
-        allow = true;
-        clearInterval(startTime);
-        controlStep = 1;
-        pixelsScrolled = 0;
-        pixels = 1;
-        reverse = true;
-        stepLeap = 1;
+        return {step: step, size: pixels};
     }
 
     function allowedScroll() {
-        currentPosition = window.pageYOffset;
-        if(((step > 0) && ((currentPosition + viewHeight) < pageHeight)) || 
-            ((step < 0) && (currentPosition > 0))) {
+        vars.positionTop = window.pageYOffset;
+
+        if(((vars.step > 0) && ((vars.positionTop + vars.viewHeight) < vars.pageHeight)) || 
+            ((vars.step < 0) && (vars.positionTop > 0))) {
             return true;
         }
 
         return false;
     }
 
-    function movePage() {
-        if(step > 0) {
-            pixelsScrolled += step;
+    function redefine() {
+        vars.allow = true;
+        vars.firstCompleted = false;
+        vars.pixelScrolled = 0;
+        vars.stepMax = {};
+        vars.step = 0;
+        vars.stepLeap = 0;
+        vars.rest = 0;
+        vars.timeStart = null;
+    }
+
+    function beginScroll() {
+        if(!vars.firstCompleted && allowedScroll() ) {
+            vars.doc.scrollTop += vars.step;
+            vars.stepLeap +=2;
+            vars.pixelScrolled += vars.stepLeap;
+
+            if(vars.stepLeap < vars.stepMax.step) {
+                if(vars.step > 0) {
+                    vars.step += 2;
+                }
+                else {
+                    vars.step -= 2;
+                }
+            } else {
+                vars.firstCompleted = true;
+            }
+        } else if((vars.pixelScrolled + vars.stepLeap) <= vars.midlleMax && allowedScroll() ) {
+            vars.doc.scrollTop += vars.step;
+            vars.pixelScrolled += vars.stepLeap;
+
+            if((vars.pixelScrolled + vars.stepLeap) > vars.midlleMax) {
+                vars.rest = vars.totalScroll - (vars.pixelScrolled + vars.stepMax.size);
+                if((vars.rest % 2) !== 0) {
+                    vars.rest -= 1;
+                }
+            }
+        } else if((vars.pixelScrolled + vars.stepLeap) <= vars.totalScroll && allowedScroll() ) {
+            vars.doc.scrollTop += vars.step;
+            vars.pixelScrolled += vars.stepLeap;
+
+            if(vars.rest !== vars.stepLeap) {
+                if(vars.step > 2) {
+                    vars.stepLeap -= 2;
+                    vars.step -= 2;
+                } else if(vars.step < -2) {
+                    vars.stepLeap -= 2;
+                    vars.step += 2;
+                }
+            } else {
+                vars.rest += 1;
+            }
         } else {
-            pixelsScrolled -= step;
-        }
-        if(pixelsScrolled < oneFourth) {
-            if( allowedScroll() ) {
-                smothStart();
-            } else {
-                endStop();
+            if(vars.pixelScrolled < vars.totalScroll) {
+                if(vars.step > 0) {
+                    vars.doc.scrollTop += 1;
+                }
+                else {
+                    vars.doc.scrollTop -= 1;
+                }
             }
-        }else if(pixelsScrolled >= threeFourth && pixelsScrolled <= scrollSize) {
-            if( allowedScroll() ) {
-                smothEnd();
-            } else {
-                endStop();
-            }
-        } else if(pixelsScrolled > scrollSize) {
-            smothStop();
-        } else {
-            if( allowedScroll() ) {
-                document.documentElement.scrollTop += step;
-            } else {
-                endStop();
-            }
+
+            clearInterval(vars.timeStart);
+            redefine();
         }
     }
 
-    function controlScroll(ahead) {
-        currentPosition = window.pageYOffset;
-        if(ahead && ((currentPosition + viewHeight) < pageHeight)) {
-            step = 1;
-            startTime = setInterval(movePage, interval || 7);
-        } else if(!ahead && (currentPosition > 0)){
-            step = -1;
-            startTime = setInterval(movePage, interval || 7);
-        } else {
-            allow = true;
-        }
-    }
-    
-    function controlSize() {
-        viewHeight = document.documentElement.clientHeight;
-        pageHeight = document.body.clientHeight;
-        scrollSize = Math.round(viewHeight * size);
-        oneFourth = Math.round(scrollSize / 4);
-        threeFourth = Math.round(oneFourth * 3);
-    }
-    
-    function getCurrentElement(ev) {
+    function dataSetElement(ev) {
         if(!ev) {
             ev = window.event;
         }
-        allowScroll = ev.target.dataset.scroll || 'no';
-    }
-    
-    function verifyAllowScroll() {
-        if(allowScroll === 'yes') {
-            return false;
-        }
-        return true;
-    }
+        let dataset = ev.target.dataset.scroll || 'no';
 
-    function startMouse(ev) {
-        if(!ev) {
-            ev = window.event;
+        if(dataset.toLowerCase() === 'yes') {
+            vars.datasetScroll = true;
+        } else {
+            vars.datasetScroll = false;
         }
-        if( verifyAllowScroll() ) {
-            preventScrool(ev);
-            if(allow) {
-                allow = false;
-                if(ev.deltaY > 0) {
-                    controlScroll(true);
-                } else if(ev.deltaY < 0) {
-                    controlScroll(false);
+    }
+    vars.doc.addEventListener('mouseover', dataSetElement);
+
+    return function(obj) {
+        vars.interval = obj.interval || 16;
+        vars.viewHeight = vars.doc.clientHeight;
+        vars.totalScroll = Math.round(vars.viewHeight * (obj.viewSize || 1));
+        vars.stepMax = defineMaxStep(Math.round(vars.totalScroll / 3.4));
+        vars.midlleMax = vars.totalScroll - vars.stepMax.size;
+        vars.pageHeight = document.body.clientHeight;
+
+        function startScroll() {
+            if(vars.allow) {
+                vars.allow = false;
+
+                if(obj.direction.toLowerCase() === 'ahead') {
+                    vars.step = 2;
+                    vars.timeStart = setInterval(beginScroll, vars.interval);
+                } else if(obj.direction.toLowerCase() === 'back') {
+                    vars.step = -2;
+                    vars.timeStart = setInterval(beginScroll, vars.interval);
                 }
             }
         }
-    }
 
-    function startKey(ev) {
-        if(!ev) {
-            ev = window.event;
+        if(!vars.datasetScroll) {
+            startScroll();
         }
-        if( verifyAllowScroll() ) {
-            preventScrool(ev);
-            if(allow) {
-                if((ev.keyCode === 32) || (ev.keyCode === 34) || (ev.keyCode === 40)) {
-                    allow = false;
-                    controlScroll(true);
-                } else if((ev.keyCode === 33) || (ev.keyCode === 38)) {
-                    allow = false;
-                    controlScroll(false);
-                }
-            }
-        }
-    }
-
-    function startScroll() {
-        if(document.readyState === 'loading') {
-            setTimeout(startScroll, 250);
-        } else {
-            controlSize();
-            document.addEventListener('wheel', startMouse, {passive: false});
-            document.addEventListener('keydown', startKey);
-            document.addEventListener('mouseover', getCurrentElement);
-            window.addEventListener('resize', controlSize);
-        }
-    }
-
-    setTimeout(startScroll, 250);
-}
+    };
+})();
