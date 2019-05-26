@@ -26,7 +26,7 @@ const  scroll = (function() {
             pixels = 0;
         while(true) {
             if(pixels < size) {
-                step += 2
+                step += 2;
                 pixels += step;
             } else {
                 break;
